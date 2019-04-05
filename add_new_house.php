@@ -19,27 +19,17 @@
 		<title>Новостройки:Админ</title>
 	</head>
 	<body>
-		<?php
-			include 'db_manager.php';
-			$dbManager = new DbManager();
-			if(array_key_exists('name', $_POST)) {
-				$complex_name = $_POST['complex_name'];				
-				$complex_id = $dbManager->getComplexIdByName($complex_name);
-				$dbManager->addHouse($_POST['name'], $complex_id);
-				echo "<script>document.location.href = 'admin.php'</script>";
-			
-			}
-		?>
-
-
 		<div class = 'container'>
 			<h2 class = 'display-4'>Добавить дом</h2>
 			<p></p>
-			<form action = 'add_new_house.php' method = 'POST'>
+			<form action = 'admin.php' method = 'POST'>
+				<input type = "hidden" name = "id" value = "add_new_house" />
 				<h5>Название:</h5>  <input type = 'text' class = 'form-control' name = 'name' />
 				<h5>Комплекс:</h5>  
 				<select name = 'complex_name' class = 'form-control'>
 					<?php 
+						include 'db_manager.php';
+						$dbManager = new DbManager();
 						$complex_names = $dbManager->getAllComplexNamesAsArray();
 						foreach($complex_names as $complex_name) {
 							echo "<option value = '".$complex_name."'>".$complex_name."</option>\n";

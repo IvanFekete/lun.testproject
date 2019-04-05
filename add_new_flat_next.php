@@ -22,11 +22,12 @@
 		<?php
 			include 'db_manager.php';
 			include 'data_formats.php';
+			include 'error_messages.php';
 			$dbManager = new DbManager();
 			
 			
 			if(array_key_exists('house_name', $_POST)) {
-				$error_message = DataFormatter::getMessage($_POST['square'], $_POST['price']);
+				$error_message = ErrorMessages::getMessage($_POST['square'], $_POST['price']);
 				if($error_message != '') {
 					echo $error_message;
 				}
@@ -43,7 +44,7 @@
 						$price = (int) $price * $square;
 					}
 					$dbManager->addFlat($house_id, $flat_type_id, $square, $price);
-					echo "<script>document.location.href = 'admin.php'</script>";
+					header('Location: admin.php');
 				}
 			}
 		?>
@@ -51,7 +52,7 @@
 		<div class = 'container'>
 			<h2 class = 'display-4'>Добавить квартиру</h2>
 			<p></p>
-			<form action = 'add_new_flat_next.php' method = 'POST'>
+			<form id = 'add_new_flat' name = 'add_new_flat' action = 'add_new_flat_next.php' method = 'POST'>
 				<h5>Комплекс:</h5>  
 				<select name = 'complex_name' class = 'form-control'>
 					<?php 

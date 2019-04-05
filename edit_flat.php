@@ -22,19 +22,24 @@
 		<?php
 			include 'db_manager.php';
 			include 'data_formats.php';
+			include 'error_messages.php';
 			$dbManager = new DbManager();
 			
-			if(array_key_exists('id', $_GET)) {
-				$id = $_GET['id'];
+			if(array_key_exists('flat_id', $_POST)) {
+				$id = $_POST['flat_id'];
 				$complex_name = $dbManager->getComplexNameByFlatId($id);
 				$house_name = $dbManager->getHouseNameByFlatId($id);
 				$flat_type = $dbManager->getFlatTypeByFlatId($id);
 				$square = $dbManager->getFlatSquareById($id);
 				$price = $dbManager->getFlatPriceById($id);
 			}
+			else {
+				echo ErrorMessages::getUnexpectedErrorMessage();
+			}
+			
 			
 			if(array_key_exists('house_name', $_POST)) {
-				$error_message = DataFormatter::getMessage($_POST['square'], $_POST['price']);
+				$error_message = ErrorMessages::getMessage($_POST['square'], $_POST['price']);
 				if($error_message != '') {
 					echo $error_message;
 				}
@@ -55,7 +60,7 @@
 						" WHERE id = ".$id;
 					
 					$dbManager->runQuery($sql);
-					echo "<script>document.location.href = 'admin.php'</script>";
+					header('Location: admin.php');
 				}
 			}
 		?>
@@ -65,7 +70,8 @@
 			<p></p>
 			<?php 
 			echo "
-			<form action = 'edit_flat.php?id=".$id."' method = 'POST'>
+			<form action = 'edit_flat.php' method = 'POST'>
+				<input type = 'hidden' name = 'flat_id' value = '".$id."' />
 				<h5>Комплекс:</h5>  
 				<select name = 'complex_name' class = 'form-control'>";
 						echo "<option value = '".$complex_name."'>".$complex_name."</option>\n";

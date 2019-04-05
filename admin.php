@@ -21,7 +21,95 @@
 	<body>
 		<?php
 			include 'db_manager.php';
+			include 'error_messages.php';
 			$dbManager = new DbManager();
+			
+			if(array_key_exists('id', $_POST)) {
+				$id = $_POST['id'];
+				
+				if($id == 'delete_complex') {
+					if(array_key_exists('delete_complexes', $_POST)) {
+						$to_delete = $_POST['delete_complexes'];
+						foreach($to_delete as $complex_id) {
+							$dbManager->deleteComplex($complex_id);
+						}
+					}
+					else {
+						echo ErrorMessages::getUnexpectedErrorMessage();
+					}
+				}
+					
+				if($id == 'delete_flat') {
+					if(array_key_exists('delete_flats', $_POST)) {
+						$to_delete = $_POST['delete_flats'];
+						foreach($to_delete as $flat_id) {
+							$dbManager->deleteFlat($flat_id);
+						}
+					}
+					else {
+						echo ErrorMessages::getUnexpectedErrorMessage();
+					}
+				}
+				
+				if($id == 'delete_house') {
+					if(array_key_exists('delete_houses', $_POST)) {
+						$to_delete = $_POST['delete_houses'];
+						foreach($to_delete as $house_id) {
+							$dbManager->deleteHouse($house_id);
+						}
+					}
+					else {
+						echo ErrorMessages::getUnexpectedErrorMessage();
+					}
+				}
+				
+				if($id == 'add_new_complex') {
+					if(array_key_exists('name', $_POST) && array_key_exists('name', $_POST)) {
+						$dbManager->addComplex($_POST['name'], $_POST['city']);
+					}
+					else {
+						echo ErrorMessages::getUnexpectedErrorMessage();
+					}
+				}
+				
+				if($id == 'add_new_house') {
+					if(array_key_exists('name', $_POST) && array_key_exists('complex_name', $_POST)) {
+						$complex_name = $_POST['complex_name'];				
+						$complex_id = $dbManager->getComplexIdByName($complex_name);
+						$dbManager->addHouse($_POST['name'], $complex_id);
+					}
+					else {
+						echo ErrorMessages::getUnexpectedErrorMessage();
+					}
+				}
+				
+				if($id == 'edit_complex') {					
+					if(array_key_exists('name', $_POST) && array_key_exists('city', $_POST) && array_key_exists('id', $_POST)) {
+						$dbManager->runQuery("UPDATE complexes SET
+							name = '".$_POST['name'].
+							"', city = '".$_POST['city'].
+							"' WHERE id = ".$_POST['complex_id']);
+					}
+					else {
+						echo ErrorMessages::getUnexpectedErrorMessage();
+					}
+				}
+				
+				if($id == 'edit_house') {
+					if(array_key_exists('name', $_POST) && array_key_exists('complex_name', $_POST) && array_key_exists('id', $_POST)) {				
+						$complex_id = $dbManager->getComplexIdByName($_POST['complex_name']);
+						$sql = "UPDATE houses SET
+							name = '".$_POST['name'].
+							"', complex_id = '".$complex_id.
+							"' WHERE id = ".$_POST['house_id'];
+						$dbManager->runQuery($sql);
+					}
+					else {
+						echo ErrorMessages::getUnexpectedErrorMessage();
+					}
+				}
+				
+			}
 			
 			function getCol($s) {
 				return "<td>".$s."</td>";
@@ -38,7 +126,9 @@
 			<input type = 'button' class = 'btn btn-success' value = 'Добавить' 
 				onclick = 'document.location.href = "add_new_complex.php"' />
 			
-			<form id = "delete_complex" action = "delete_complex.php" method = "POST"></form>
+			<form id = "delete_complex" action = "admin.php" method = "POST">
+				<input type = "hidden" name = "id" value = "delete_complex" />
+			</form>
 			<script>
 				$("#delete_complex").submit(function() {
 					return confirm("Вы действительно хотите удалить выбранные новостройки?");
@@ -60,8 +150,11 @@
 					foreach($all as $row) {
 						$name = $row['name'];
 						$city = $row['city'];
-						$update_button = " <input type = 'submit' class = 'btn btn-warning' value = 'Изменить' 
-						onclick = 'document.location.href = \"edit_complex.php?id=".$row['id']."\"'/>";
+						$update_button = "
+						<form action = 'edit_complex.php' method = 'POST'>
+							<input type = 'hidden' name = 'complex_id' value = '".$row['id']."' />
+							<input type = 'submit' class = 'btn btn-warning' value = 'Изменить' />
+						</form>";
 						$delete_checkbox = "<input form = 'delete_complex' type = 'checkbox' name = 'delete_complexes[]' value = '".$row['id']."'/>";
 						echo "<tr>".getCol($name).getCol($city).getCol($update_button).getCol($delete_checkbox)."</tr>";
 					}
@@ -74,7 +167,9 @@
 			
 			<input type = 'button' class = 'btn btn-success' value = 'Добавить' 
 				onclick = 'document.location.href = "add_new_house.php"' />
-			<form id = "delete_house" action = "delete_house.php" method = "POST"></form>
+			<form id = "delete_house" action = "admin.php" method = "POST">
+				<input type = "hidden" name = "id" value = "delete_house" />
+			</form>
 			<script>
 				$("#delete_house").submit(function() {
 					return confirm("Вы действительно хотите удалить выбранные дома?");
@@ -95,8 +190,11 @@
 					foreach($all as $row) {
 						$name = $row['name'];
 						$complex_name = $dbManager->getComplexNameByHouseId($row['id']);;
-						$update_button = "<input type = 'submit' class = 'btn btn-warning' value = 'Изменить'
-						onclick = 'document.location.href = \"edit_house.php?id=".$row['id']."\"'/>";
+						$update_button = "
+						<form action = 'edit_house.php' method = 'POST'>
+							<input type = 'hidden' name = 'house_id' value = '".$row['id']."' />
+							<input type = 'submit' class = 'btn btn-warning' value = 'Изменить' />
+						</form>";
 						$delete_checkbox = "<input form = 'delete_house' type = 'checkbox' name = 'delete_houses[]' value = '".$row['id']."'/>";
 						echo "<tr>".getCol($name).getCol($complex_name).getCol($update_button).getCol($delete_checkbox)."</tr>";
 					}
@@ -111,7 +209,9 @@
 			<input type = 'button' class = 'btn btn-success' value = 'Добавить типовую квартиру' 
 				onclick = 'document.location.href = "add_new_typical_flat.php"' />
 			
-			<form id = "delete_flat" action = "delete_flat.php" method = "POST"></form>
+			<form id = "delete_flat" action = "admin.php" method = "POST">
+				<input type = "hidden" name = "id" value = "delete_flat" />
+			</form>
 			<script>
 				$("#delete_flat").submit(function() {
 					return confirm("Вы действительно хотите удалить выбранные квартиры?");
@@ -141,8 +241,11 @@
 						$flat_type = $dbManager->getFlatTypeById($row['flat_type_id']);
 						$square = $row['square'];
 						$price = $row['price'];
-						$update_button = "<input type = 'submit' class = 'btn btn-warning' value = 'Изменить' 
-						onclick = 'document.location.href = \"edit_flat.php?id=".$row['id']."\"'/>";
+						$update_button = "
+						<form action = 'edit_flat.php' method = 'POST'>
+							<input type = 'hidden' name = 'flat_id' value = '".$row['id']."' />
+							<input type = 'submit' class = 'btn btn-warning' value = 'Изменить' />
+						</form>";
 						$delete_checkbox = "<input form = 'delete_flat' type = 'checkbox' name = 'delete_flats[]' value = '".$row['id']."'/>";
 						echo "<tr>".getCol($complex_city).getCol($complex_name).getCol($house_name).
 							getCol($flat_type).getCol($square."  кв.м").getCol($price." грн").

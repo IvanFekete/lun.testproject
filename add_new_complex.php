@@ -1,16 +1,3 @@
-<?php
-	include 'db_manager.php';
-	$dbManager = new DbManager();
-	
-	if(array_key_exists('name', $_POST)) {
-		$dbManager->addComplex($_POST['name'], $_POST['city']);
-		echo "<script>document.location.href = 'admin.php'</script>";
-	}
-		
-	
-?>
-
-
 <!DOCTYPE html>
 <html lang = 'ru'>
 	<head>
@@ -35,7 +22,8 @@
 		<div class = 'container'>
 			<h2 class = 'display-4'>Добавить новостройку</h2>
 			<p></p>
-			<form action = 'add_new_complex.php' method = 'POST'>
+			<form action = 'admin.php' method = 'POST'>
+				<input type = "hidden" name = "id" value = "add_new_complex" />
 				<h5>Название:</h5>  <input type = 'text' class = 'form-control' name = 'name' />
 				<h5>Город:</h5>  <input type = 'text' class = 'form-control' name = 'city' />
 				<p></p>
